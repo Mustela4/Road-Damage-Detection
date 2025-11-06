@@ -1,7 +1,7 @@
 # 🛣️ Road Damage Detection (RDD2022) – Faster R-CNN ResNet50
 
 ## Overview
-This project detects and classifies road surface damages using **Faster R-CNN (ResNet-50 FPN)**, trained on the **RDD2022 Japan dataset**.  
+This project detects and classifies road surface damages using **Faster R-CNN (ResNet-50 FPN)**, trained on the **RDD2022 dataset**.  
 It supports full training, evaluation (mAP), and real-time inference via a Flask web app.
 
 ---
