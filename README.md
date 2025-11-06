@@ -10,7 +10,7 @@ It supports full training, evaluation (mAP), and real-time inference via a Flask
 **Input:**  
 - Images and bounding box annotations from RDD2022.
 **Output:**  
-- Best checkpoint: `checkpoints/best_model_checkpoint_epoch_31.pth`  
+- Best checkpoint: `checkpoints/best_model_checkpoint_epoch_30.pth`  
 - Flask app for visualizing predictions (upload or via URL).
 
 ---
