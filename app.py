@@ -15,7 +15,6 @@ import requests
 
 APP_TITLE = "Road Damage Detection"
 
-# 10 ảnh mẫu để test
 SAMPLE_DIR = os.getenv("SAMPLE_DIR", r"D:\DL\Dataset\test_inference\images")
 
 CHECKPOINT_PATH = os.getenv(
@@ -34,15 +33,10 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def load_model(checkpoint_path: str, device: torch.device):
-    """
-    Build Faster R-CNN model bằng hàm build_model trong finetune.py
-    và nạp checkpoint đã train.
-    """
-    from finetune import build_model  # dùng đúng model của repo bạn
+    from finetune import build_model 
     model = build_model(NUM_CLASSES)
 
     ckpt = torch.load(checkpoint_path, map_location=device)
-    # hỗ trợ cả dạng state_dict thuần hoặc dict có "model_state_dict"
     state_dict = ckpt["model_state_dict"] if isinstance(ckpt, dict) and "model_state_dict" in ckpt else ckpt
     model.load_state_dict(state_dict, strict=True)
 
@@ -51,9 +45,6 @@ def load_model(checkpoint_path: str, device: torch.device):
 
 
 def fetch_image_from_url(url: str) -> Image.Image:
-    """
-    Tải ảnh từ URL (http/https) -> PIL Image RGB.
-    """
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     r = requests.get(url, headers=headers, timeout=12)
     r.raise_for_status()
@@ -61,18 +52,12 @@ def fetch_image_from_url(url: str) -> Image.Image:
 
 
 def pil_to_base64(img: Image.Image, fmt: str = "PNG") -> str:
-    """
-    Convert PIL Image -> data URL base64 để trả ra frontend.
-    """
     buf = io.BytesIO()
     img.save(buf, format=fmt)
     return f"data:image/{fmt.lower()};base64,{base64.b64encode(buf.getvalue()).decode('utf-8')}"
 
 
 def postprocess_nms(boxes, scores, labels):
-    """
-    Lọc box theo CONF_THRESH + NMS, giới hạn TOPK.
-    """
     keep = scores >= CONF_THRESH
     boxes = boxes[keep]
     scores = scores[keep]
@@ -90,9 +75,6 @@ def postprocess_nms(boxes, scores, labels):
 
 
 def draw_boxes(pil_img: Image.Image, boxes, scores, labels) -> Image.Image:
-    """
-    Vẽ bbox + score lên ảnh, trả về ảnh mới.
-    """
     img = pil_img.copy()
     draw = ImageDraw.Draw(img)
     try:
@@ -104,7 +86,6 @@ def draw_boxes(pil_img: Image.Image, boxes, scores, labels) -> Image.Image:
         x1, y1, x2, y2 = [int(v) for v in b.tolist()]
         draw.rectangle([x1, y1, x2, y2], outline=(255, 0, 0), width=3)
         caption = f"{int(c)}:{float(s):.2f}"
-        # vẽ nền caption
         try:
             t_left, t_top, t_right, t_bottom = draw.textbbox((x1, max(0, y1 - 18)), caption, font=font)
             draw.rectangle([t_left - 4, t_top - 2, t_right + 4, t_bottom + 2], fill=(255, 0, 0))
@@ -115,9 +96,6 @@ def draw_boxes(pil_img: Image.Image, boxes, scores, labels) -> Image.Image:
 
 
 def run_inference(pil_img: Image.Image, model) -> Dict:
-    """
-    Chạy inference 1 ảnh PIL -> trả base64 + bbox info.
-    """
     t0 = time.time()
     with torch.no_grad():
         tensor = to_tensor(pil_img).to(DEVICE)  # (C,H,W), 0..1
@@ -148,10 +126,6 @@ def run_inference(pil_img: Image.Image, model) -> Dict:
     }
 
 
-# =========================
-# Flask app
-# =========================
-
 app = Flask(__name__, template_folder="templates")
 
 try:
@@ -171,9 +145,6 @@ def home():
 
 @app.route("/detect", methods=["POST"])
 def detect():
-    """
-    Nhận JSON: {"imageUrl": "..."} -> trả JSON chứa ảnh + bbox.
-    """
     if not MODEL_READY:
         return jsonify({"ok": False, "error": MODEL_MSG}), 500
 
@@ -192,9 +163,6 @@ def detect():
 
 @app.route("/test-samples", methods=["POST"])
 def test_samples():
-    """
-    Chạy thử 10 ảnh ngẫu nhiên trong SAMPLE_DIR.
-    """
     if not MODEL_READY:
         return jsonify({"ok": False, "error": MODEL_MSG}), 500
 
