@@ -38,8 +38,7 @@ Moreover, we achieved **mAP 0.20 by around epoch 15**, while their 0.31 was reac
 
 ## Dataset
 Official dataset:  
-🔗 https://datasetninja.com/road-damage-detector  
-or  
+🔗 https://datasetninja.com/road-damage-detector
 
 ---
 
